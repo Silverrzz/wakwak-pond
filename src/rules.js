@@ -494,4 +494,4 @@ class DuckGame {
   }
 }
 
-module.exports = { DuckGame, square, index, color, sideName, opposite, backrank };
+export { DuckGame, square, index, color, sideName, opposite, backrank };

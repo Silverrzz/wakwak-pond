@@ -1,6 +1,6 @@
-const { DuckGame, index, square, sideName } = require('./rules');
-const { GameClock, normalizeControl } = require('./clock');
-const { SearchData } = require('./search-data');
+import { DuckGame, index, square, sideName } from './rules.js';
+import { GameClock, normalizeControl } from './clock.js';
+import { SearchData } from './search-data.js';
 
 const results = new Set(['*', '1-0', '0-1', '1/2-1/2']);
 const safe = (value) =>
@@ -555,4 +555,4 @@ function formatPgn(session, playerName) {
   );
 }
 
-module.exports = { parsePgn, formatPgn };
+export { parsePgn, formatPgn };

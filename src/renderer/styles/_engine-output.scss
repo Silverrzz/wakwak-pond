@@ -1,13 +1,4 @@
 @use 'mixins';
-
-.game-searches {
-  --white-size: 50%;
-  flex: 1;
-  min-height: 0;
-  display: grid;
-  grid-template-rows: minmax(0, var(--white-size)) 5px minmax(0, 1fr);
-  overflow: hidden;
-}
 .search-pane {
   min-height: 0;
   min-width: 0;
@@ -88,8 +79,6 @@
 }
 .move.active,
 .move.active:hover:not(:disabled),
-.engine-list button.active,
-.engine-list button.active:hover:not(:disabled),
 .search-table tr.selected-row td {
   color: var(--text-strong);
   background: var(--surface-selected);
@@ -120,7 +109,6 @@
 .search-status:empty {
   display: none;
 }
-
 .analysis-panel {
   display: flex;
   flex: 1;
@@ -185,33 +173,8 @@
   background: var(--surface-selected);
   color: var(--text-strong);
 }
-
-.output-panel > .dock-heading {
-  justify-content: space-between;
-}
 .search-table tr.expanded-variation td:last-child {
   white-space: normal;
   overflow-wrap: anywhere;
   user-select: text;
-}
-
-.analysis-source-controls,
-.analysis-import-controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: var(--space-1);
-}
-.analysis-import {
-  padding: var(--space-2);
-  border-bottom: 1px solid var(--line);
-}
-.analysis-import textarea {
-  width: 100%;
-  margin-top: var(--space-2);
-  resize: vertical;
-  font-family: var(--font-mono);
-}
-.analysis-import-controls select {
-  width: auto;
-  margin-right: auto;
 }

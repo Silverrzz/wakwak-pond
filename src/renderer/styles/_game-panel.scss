@@ -1,25 +1,13 @@
 @use 'mixins';
-
-.game-panel,
-.output-panel,
 .graph-panel {
   display: flex;
   flex-direction: column;
   overflow: hidden;
 }
-.game-panel {
-  grid-column: 3;
-  grid-row: 1;
-}
-.output-panel {
-  grid-column: 5;
-  grid-row: 1;
-}
 .graph-panel {
   grid-column: 1 / -1;
   grid-row: 3;
 }
-.game-heading,
 .dock-heading,
 .search-heading {
   @include mixins.row(var(--space-2));
@@ -28,12 +16,8 @@
   border-bottom: 1px solid var(--line);
   flex: 0 0 auto;
 }
-.game-heading,
 .dock-heading {
   min-height: 37px;
-}
-.game-heading {
-  justify-content: space-between;
 }
 .dock-heading h2 {
   font-size: var(--text-size);
@@ -43,9 +27,7 @@
   width: auto;
   max-width: 110px;
 }
-#game-subtitle,
-.search-position,
-#move-counter {
+.search-position {
   color: var(--text-muted);
   font: var(--text-small)/1.5 var(--font-mono);
   white-space: nowrap;
@@ -56,34 +38,6 @@
   line-height: 1.5;
   overflow-wrap: anywhere;
   flex: 0 0 auto;
-}
-.tabs {
-  display: flex;
-  border-bottom: 1px solid var(--line);
-  flex: 0 0 auto;
-}
-.tabs button {
-  flex: 1;
-  height: 30px;
-  border: 0;
-  border-bottom: 2px solid transparent;
-  border-radius: 0;
-  background: transparent;
-  color: var(--text-muted);
-}
-.tabs button[aria-selected='true'] {
-  color: var(--text-strong);
-  border-bottom-color: var(--text);
-  background: var(--surface-selected);
-}
-.tab-panel {
-  min-height: 0;
-  flex: 1;
-  overflow: auto;
-}
-.moves-panel {
-  display: flex;
-  flex-direction: column;
 }
 .history-heading,
 .history-row {
@@ -129,15 +83,11 @@
   font: var(--text-small)/1.5 var(--font-mono);
 }
 .move-navigation,
-.game-controls,
-.engine-toolbar,
-.engine-save,
 .dialog-footer {
   @include mixins.row(var(--space-2));
   flex: 0 0 auto;
 }
-.move-navigation,
-.game-controls {
+.move-navigation {
   padding: 6px var(--space-2);
   background: var(--surface-input);
 }
@@ -147,8 +97,7 @@
   gap: var(--space-1);
   border-top: 1px solid var(--line);
 }
-.move-navigation button,
-.game-controls button {
+.move-navigation button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -166,68 +115,14 @@
   width: 28px;
   padding: 0;
 }
-.move-navigation button:hover:not(:disabled),
-.game-controls button:hover:not(:disabled) {
+.move-navigation button:hover:not(:disabled) {
   color: var(--text-strong);
   background: var(--surface-hover);
 }
-.move-navigation button:active:not(:disabled),
-.game-controls button:active:not(:disabled) {
+.move-navigation button:active:not(:disabled) {
   background: var(--surface-selected);
 }
-.move-navigation button:disabled,
-.game-controls button:disabled {
+.move-navigation button:disabled {
   color: var(--text-disabled);
   opacity: 0.45;
-}
-.game-panel .control-icon {
-  width: 18px;
-  height: 18px;
-  flex: 0 0 18px;
-  fill: none;
-  stroke: currentColor;
-  stroke-width: 1.8;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-}
-#move-counter {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 6px;
-  min-width: 0;
-  font-variant-numeric: tabular-nums;
-}
-.current-ply {
-  color: var(--text);
-  font-weight: 600;
-}
-.move-counter-divider {
-  color: var(--text-disabled);
-}
-.game-controls {
-  flex-wrap: wrap;
-  gap: var(--space-1);
-  padding-top: 0;
-}
-.game-controls button {
-  padding: 0 var(--space-2);
-}
-.position-panel {
-  padding: var(--space-2);
-}
-#position-fen {
-  margin-bottom: var(--space-2);
-}
-.position-details {
-  margin-top: var(--space-3);
-}
-.position-details div,
-.shortcuts div {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-2);
-  padding: var(--space-2) 0;
-  border-bottom: 1px solid var(--line);
 }

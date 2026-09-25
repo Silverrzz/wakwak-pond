@@ -1,9 +1,9 @@
-const { EventEmitter } = require('node:events');
-const { DuckGame, square } = require('./rules');
-const { Engine } = require('./engine');
-const { SearchData } = require('./search-data');
-const { parsePgn, formatPgn } = require('./pgn');
-const { GameClock } = require('./clock');
+import { EventEmitter } from './events.js';
+import { DuckGame, square } from './rules.js';
+import { Engine } from './engine.js';
+import { SearchData } from './search-data.js';
+import { parsePgn, formatPgn } from './pgn.js';
+import { GameClock } from './clock.js';
 
 const scoreValue = (row) =>
   row.scoreType === 'mate'
@@ -22,7 +22,6 @@ class Analysis extends EventEmitter {
     this.resolveEngine = resolveEngine;
     this.log = log;
     this.enabled = false;
-    this.running = true;
     this.revision = 0;
     this.generation = 0;
     this.engine = null;
@@ -40,7 +39,6 @@ class Analysis extends EventEmitter {
   snapshot() {
     return {
       enabled: this.enabled,
-      running: this.running,
       revision: this.revision,
       gameId: this.gameId,
       rootPly: this.rootPly,
@@ -99,7 +97,6 @@ class Analysis extends EventEmitter {
     if (input.engineId) this.resolveEngine(input.engineId);
     const game = Object.assign(Object.create(DuckGame.prototype), structuredClone(source));
     if (!source.pending || input.ply !== source.moves.length) game.rewind(input.ply);
-    if (session.phase === 'playing') session.pause();
     if (this.gameId !== session.id || this.engineId !== input.engineId) this.points.clear();
     if (['fresh', 'fen', 'pgn'].includes(input.source) || (this.source && !sourceState))
       this.points.clear();
@@ -108,8 +105,6 @@ class Analysis extends EventEmitter {
     this.gameId = session.id;
     this.rootPly = input.ply;
     this.engineId = input.engineId;
-    if (!this.enabled) this.running = !!input.engineId;
-    if (!input.engineId) this.running = false;
     this.enabled = true;
     this.game = game;
     this.changed();
@@ -165,53 +160,46 @@ class Analysis extends EventEmitter {
       (!Number.isInteger(input.lines) || input.lines < 1 || input.lines > this.maxLines)
     )
       throw new Error('Choose a supported number of analysis lines.');
-    if (input.running !== undefined && typeof input.running !== 'boolean')
-      throw new Error('Invalid analysis state.');
     if (input.engineId !== undefined) {
       this.resolveEngine(input.engineId);
       this.engineId = input.engineId;
-      if (input.engineId && !this.running) this.running = true;
       this.points.clear();
       this.data = new SearchData();
       this.maxLines = 1;
       this.lines = 1;
     }
     if (input.lines !== undefined) this.lines = input.lines;
-    if (input.running !== undefined) this.running = input.running;
-    this.changed(input.running === false);
+    this.changed();
   }
 
-  changed(keepSearch = false) {
+  changed() {
     this.revision++;
     const token = ++this.generation;
     this.error = '';
     this.frame = this.game.snapshot();
-    if (keepSearch) this.data.stop(this.game.turn);
-    else {
-      const previous = this.data.current[this.game.turn];
-      this.data = new SearchData();
-      if (this.game.pending && previous) {
-        const seeds = new Map();
-        for (const row of [...previous.rows].sort((a, b) => b.depth - a.depth)) {
-          const move = row.pv?.split(/\s+/)[0];
-          if (move?.startsWith(this.game.pending.notation + '@') && !seeds.has(move))
-            seeds.set(move, row);
-        }
-        const search = this.data.start(
-          this.game.turn,
-          this.game.turn,
-          previous.source,
-          this.game.moves.length
-        );
-        search.rows = [...seeds.values()]
-          .sort((a, b) => compareScores(a, b, this.game.turn))
-          .slice(0, this.lines)
-          .map((row, i) => ({ ...row, multipv: i + 1 }));
-        search.latest = search.rows[0] || {};
-        this.data.stop(this.game.turn);
+    const previous = this.data.current[this.game.turn];
+    this.data = new SearchData();
+    if (this.game.pending && previous) {
+      const seeds = new Map();
+      for (const row of [...previous.rows].sort((a, b) => b.depth - a.depth)) {
+        const move = row.pv?.split(/\s+/)[0];
+        if (move?.startsWith(this.game.pending.notation + '@') && !seeds.has(move))
+          seeds.set(move, row);
       }
+      const search = this.data.start(
+        this.game.turn,
+        this.game.turn,
+        previous.source,
+        this.game.moves.length
+      );
+      search.rows = [...seeds.values()]
+        .sort((a, b) => compareScores(a, b, this.game.turn))
+        .slice(0, this.lines)
+        .map((row, i) => ({ ...row, multipv: i + 1 }));
+      search.latest = search.rows[0] || {};
+      this.data.stop(this.game.turn);
     }
-    this.phase = this.game.result ? 'terminal' : this.running ? 'starting' : 'stopped';
+    this.phase = this.game.result ? 'terminal' : 'starting';
     if (this.engine) this.engine.onInfo = null;
     clearTimeout(this.startTimer);
     this.startTimer = setTimeout(() => {
@@ -231,12 +219,7 @@ class Analysis extends EventEmitter {
         task,
         new Promise((_, reject) => {
           timer = setTimeout(
-            () =>
-              reject(
-                new Error(
-                  'The engine did not stop its search. Retry analysis or choose another engine.'
-                )
-              ),
+            () => reject(new Error('The engine did not respond. Restarting analysis.')),
             3000
           );
         })
@@ -251,10 +234,19 @@ class Analysis extends EventEmitter {
     }
   }
 
+  restart(delay) {
+    const token = this.generation;
+    clearTimeout(this.startTimer);
+    this.startTimer = setTimeout(() => {
+      if (token !== this.generation || !this.enabled || this.game.result) return;
+      this.queue = this.queue.catch(() => {}).then(() => this.run(token));
+    }, delay);
+  }
+
   async run(token) {
     try {
       await this.halt();
-      if (token !== this.generation || !this.enabled || !this.running || this.game.result) return;
+      if (token !== this.generation || !this.enabled || !this.engineId || this.game.result) return;
       const profile = this.resolveEngine(this.engineId);
       const key = JSON.stringify([profile.file, profile.settings, this.game.variant]);
       if (!this.engine || this.engine.closed || key !== this.engineKey) {
@@ -279,11 +271,7 @@ class Analysis extends EventEmitter {
       const multiPV = engine.options.find(
         (option) => option.name === 'MultiPV' && option.type === 'spin'
       );
-      this.maxLines = this.game.pending
-        ? 5
-        : multiPV
-          ? Math.max(1, Math.min(5, Number(multiPV.max) || 1))
-          : 1;
+      this.maxLines = multiPV ? Math.max(1, Math.min(5, Number(multiPV.max) || 1)) : 1;
       this.lines = Math.min(this.lines, this.maxLines);
       if (multiPV) engine.setOption('MultiPV', this.game.pending ? 1 : this.lines);
       await engine.request('isready', (line) => line === 'readyok');
@@ -292,6 +280,7 @@ class Analysis extends EventEmitter {
       const seeds = this.data.current[side]?.rows || [];
       this.data.start(side, side, engine.label, this.game.moves.length);
       this.phase = 'searching';
+      this.error = '';
       this.publish();
       const task = (
         this.game.pending
@@ -310,6 +299,7 @@ class Analysis extends EventEmitter {
           this.data.stop(side);
           this.phase = 'complete';
           this.publish();
+          if (!this.game.pending) this.restart(1000);
         })
         .catch((error) => {
           if (token === this.generation) this.failed(error);
@@ -412,6 +402,8 @@ class Analysis extends EventEmitter {
     this.phase = 'error';
     this.error = error.message;
     this.publish();
+    if (globalThis.crossOriginIsolated && typeof SharedArrayBuffer !== 'undefined')
+      this.restart(3000);
   }
 
   close() {
@@ -430,4 +422,4 @@ class Analysis extends EventEmitter {
   }
 }
 
-module.exports = { Analysis };
+export { Analysis };

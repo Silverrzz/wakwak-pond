@@ -22,6 +22,39 @@
 .board-wrap {
   position: relative;
 }
+.board-row.with-evaluation {
+  display: grid;
+  grid-template-columns: 18px minmax(0, 1fr);
+  gap: 6px;
+}
+.evaluation-bar {
+  position: relative;
+  overflow: hidden;
+  background: #343434;
+  border: 1px solid #7776;
+  border-radius: 2px;
+}
+.evaluation-bar-white {
+  position: absolute;
+  inset: auto 0 0;
+  background: #eeeae2;
+  transition: height 250ms ease;
+}
+.evaluation-bar-white.flipped {
+  inset: 0 0 auto;
+}
+.evaluation-bar-midpoint {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  border-top: 1px solid #8889;
+}
+@media (prefers-reduced-motion: reduce) {
+  .evaluation-bar-white {
+    transition: none;
+  }
+}
 .board {
   display: grid;
   grid-template-columns: repeat(8, 1fr);
@@ -272,21 +305,21 @@
   fill: #f39a32;
 }
 .board-suggestions {
-  --suggestion-color: #197454;
+  --suggestion-color: #466c52;
 }
 .board-suggestions .duck-suggestion {
-  --suggestion-color: #235ab4;
+  --suggestion-color: #526c88;
 }
 .board-suggestions path,
 .board-suggestions circle {
   fill: none;
   stroke: var(--suggestion-color);
-  stroke-width: 0.16;
+  stroke-width: 0.075;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
 .board-suggestions circle {
-  stroke-width: 0.1;
+  stroke-width: 0.065;
 }
 .board-suggestions polygon {
   fill: var(--suggestion-color);

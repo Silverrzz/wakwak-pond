@@ -7,9 +7,6 @@ const pieces = import.meta.glob('../../pieces/*.svg', {
 export const pieceNames = { p: 'pawn', r: 'rook', n: 'knight', b: 'bishop', q: 'queen', k: 'king' };
 export const squareName = (i) => 'abcdefgh'[i % 8] + (Math.floor(i / 8) + 1);
 export const sideName = (side) => (side === 'w' ? 'White' : 'Black');
-export const variantName = (variant) =>
-  ({ duck: 'Duck', duck960: 'Duck960', duckdfrc: 'Duck double FRC' })[variant];
-export const clone = (value) => JSON.parse(JSON.stringify(value));
 export const pieceSource = (piece, duck = false) =>
   pieces[
     `../../pieces/${duck ? 'duck' : (piece === piece.toUpperCase() ? 'w' : 'b') + piece.toLowerCase()}.svg`

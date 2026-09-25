@@ -1,4 +1,4 @@
-﻿const { randomUUID } = require('node:crypto');
+﻿const randomUUID = () => crypto.randomUUID();
 
 const channels = ['w', 'b'];
 const metrics = ['depth', 'seldepth', 'multipv', 'time', 'nodes', 'nps', 'hashfull', 'tbhits'];
@@ -143,4 +143,4 @@ class SearchData {
   }
 }
 
-module.exports = { SearchData };
+export { SearchData };

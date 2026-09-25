@@ -1,9 +1,9 @@
-﻿const { EventEmitter } = require('node:events');
-const { DuckGame, sideName, opposite } = require('./rules');
-const { GameClock } = require('./clock');
-const { Engine } = require('./engine');
-const { SearchData } = require('./search-data');
-const { parsePgn, formatPgn } = require('./pgn');
+﻿import { EventEmitter } from './events.js';
+import { DuckGame, sideName, opposite } from './rules.js';
+import { GameClock } from './clock.js';
+import { Engine } from './engine.js';
+import { SearchData } from './search-data.js';
+import { parsePgn, formatPgn } from './pgn.js';
 
 const defaultControl = () => ({
   mode: 'clock',
@@ -39,7 +39,6 @@ class Session extends EventEmitter {
       if (this.phase !== 'playing') return;
       if (!this.checkFlag()) this.emit('clock', this.clock.snapshot());
     }, 100);
-    this.timer.unref();
   }
 
   snapshot() {
@@ -195,7 +194,7 @@ class Session extends EventEmitter {
       this.clockFrames.push(this.clock.save());
       this.busy = false;
       this.publish();
-      setImmediate(() => this.advance(token));
+      setTimeout(() => this.advance(token), 0);
     } catch (error) {
       if (token === this.generation) this.pause(error.message);
     }
@@ -275,4 +274,4 @@ class Session extends EventEmitter {
   }
 }
 
-module.exports = { Session, defaultConfig };
+export { Session, defaultConfig };

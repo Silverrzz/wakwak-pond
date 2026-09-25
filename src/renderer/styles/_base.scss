@@ -75,7 +75,7 @@ input[type='checkbox'] {
   border-color: var(--line);
   cursor: default;
 }
-:where(button, input, select, textarea, summary, canvas, [tabindex]):focus-visible {
+:where(button, input, select, textarea, canvas, [tabindex]):focus-visible {
   outline: 2px solid var(--focus);
   outline-offset: -2px;
 }
@@ -129,7 +129,6 @@ h2 {
 }
 dt,
 .hint,
-.directory,
 .graph-perspective,
 .graph-empty {
   color: var(--text-muted);

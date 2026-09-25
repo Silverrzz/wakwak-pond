@@ -1,7 +1,3 @@
-﻿const { spawn } = require('node:child_process');
-const path = require('node:path');
-const children = new Set();
-
 function parseOption(line) {
   const match = /^option name (.+?) type (check|spin|combo|button|string)(?:\s+(.*))?$/.exec(line);
   if (!match) return null;
@@ -18,59 +14,37 @@ function parseOption(line) {
 
 class Engine {
   constructor(file, log = () => {}, failure = () => {}) {
-    this.label = path.basename(file);
+    this.label = 'Wakwak';
     this.log = log;
     this.failure = failure;
     this.options = [];
     this.waiter = null;
     this.closed = false;
-    this.buffer = '';
     this.onInfo = null;
-    this.child = spawn(file, [], {
-      cwd: path.dirname(file),
-      windowsHide: true,
-      shell: false,
-      stdio: ['pipe', 'pipe', 'pipe']
-    });
-    children.add(this.child);
-    this.child.stdout.setEncoding('utf8');
-    this.child.stdout.on('data', (chunk) => {
-      this.buffer += chunk;
-      if (this.buffer.length > 1024 * 1024)
-        return this.fail(new Error('Engine output exceeded its limit.'));
-      let end;
-      while ((end = this.buffer.indexOf('\n')) >= 0) {
-        const line = this.buffer.slice(0, end).trim();
-        this.buffer = this.buffer.slice(end + 1);
-        this.log(this.label, '<', line.slice(0, 2000));
-        if (line.startsWith('id name ')) this.label = line.slice(8, 200);
-        const option = parseOption(line);
-        if (option) this.options.push(option);
-        if (/^info\s/.test(line) && !/^info string\s/.test(line)) this.onInfo?.(line);
-        if (this.waiter?.accept(line)) {
-          const waiter = this.waiter;
-          this.waiter = null;
-          clearTimeout(waiter.timer);
-          waiter.resolve(line);
-        }
+    if (!globalThis.crossOriginIsolated || typeof SharedArrayBuffer === 'undefined')
+      throw new Error('Wakwak could not start in this browser. Try a current browser or reload the page.');
+    this.worker = new Worker(file);
+    this.worker.onmessage = ({ data }) => {
+      if (this.closed || typeof data !== 'string') return;
+      const line = data.trim();
+      this.log(this.label, '<', line.slice(0, 2000));
+      if (line.startsWith('info string Browser engine error:') || line.startsWith('Aborted('))
+        return this.fail(new Error(line));
+      if (line.startsWith('id name ')) this.label = line.slice(8, 200);
+      const option = parseOption(line);
+      if (option) this.options.push(option);
+      if (/^info\s/.test(line) && !/^info string\s/.test(line)) this.onInfo?.(line);
+      if (this.waiter?.accept(line)) {
+        const waiter = this.waiter;
+        this.waiter = null;
+        clearTimeout(waiter.timer);
+        waiter.resolve(line);
       }
-    });
-    this.child.stderr.on('data', (chunk) =>
-      this.log(this.label, '!', chunk.toString().slice(0, 2000))
-    );
-    this.child.on('error', (error) => this.fail(error));
-    this.child.stdin.on('error', (error) => this.fail(error));
-    this.child.on('exit', (code, signal) => {
-      children.delete(this.child);
-      clearTimeout(this.killTimer);
-      if (!this.closed) this.fail(new Error(`Engine exited (${signal || code}).`));
-    });
+    };
+    this.worker.onerror = () => this.fail(new Error('Wakwak could not load. Please reload and try again.'));
+    this.worker.onmessageerror = () => this.fail(new Error('Wakwak connection was interrupted.'));
   }
 
-  static killAll() {
-    for (const child of children) child.kill();
-    children.clear();
-  }
   get nativeDuck() {
     return this.options.some((o) => o.name === 'UseDumbInterface');
   }
@@ -88,7 +62,7 @@ class Engine {
     if (this.closed) throw new Error('Engine is closed.');
     if (/[\r\n]/.test(line)) throw new Error('Engine commands cannot contain newlines.');
     this.log(this.label, '>', line);
-    this.child.stdin.write(line + '\n');
+    this.worker.postMessage(line);
   }
 
   request(command, accept, timeout = 10000) {
@@ -112,7 +86,7 @@ class Engine {
   }
 
   async handshake() {
-    await this.request('uci', (line) => line === 'uciok');
+    await this.request('uci', (line) => line === 'uciok', 60000);
     return {
       name: this.label,
       options: this.options,
@@ -214,10 +188,8 @@ class Engine {
       this.waiter.reject(error);
       this.waiter = null;
     }
-    if (this.child.stdin.writable) this.child.stdin.end('stop\nquit\n');
-    this.killTimer = setTimeout(() => this.child.kill(), 500);
-    this.killTimer.unref();
+    this.worker.terminate();
   }
 }
 
-module.exports = { Engine, parseOption };
+export { Engine, parseOption };

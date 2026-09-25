@@ -1,5 +1,5 @@
 import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue';
-import { sideName, timeDescription, variantName } from '../shared/format';
+import { sideName } from '../shared/format';
 
 export function useGame(feedback) {
   const liveState = shallowRef(null);
@@ -14,14 +14,11 @@ export function useGame(feedback) {
   const catalog = shallowRef([]);
   const liveSearches = shallowRef({});
   const evaluations = shallowRef([]);
-  const directory = ref('');
-  const logs = shallowRef([]);
   const selected = ref(null);
   const flipped = ref(localStorage.getItem('pond-flipped') === 'true');
   const promotionMove = shallowRef(null);
   const draggedMove = shallowRef(null);
   const submitting = ref(false);
-  const starting = ref(false);
   const reviewPly = ref(null);
   const reviewFrame = shallowRef(null);
   const reviewTarget = ref(null);
@@ -81,26 +78,6 @@ export function useGame(feedback) {
       (reviewPly.value === null ? liveSearches.value : reviewFrame.value?.searches) ||
       liveSearches.value
   );
-  const heading = computed(() => {
-    if (!state.value) return { title: 'Duck', subtitle: '', description: '' };
-    const current = state.value;
-    const controls = current.clock.controls;
-    const same = JSON.stringify(controls.w) === JSON.stringify(controls.b);
-    const custom = current.config.customPosition ?? !!current.config.fen;
-    return {
-      title: variantName(current.variant),
-      subtitle: custom
-        ? 'FEN'
-        : current.variant === 'duck'
-          ? ''
-          : '#' +
-            current.position +
-            (current.variant === 'duckdfrc' ? ' / #' + current.blackPosition : ''),
-      description: same
-        ? timeDescription(controls.w)
-        : 'White: ' + timeDescription(controls.w) + ' · Black: ' + timeDescription(controls.b)
-    };
-  });
   const status = computed(() => {
     const current = state.value;
     if (!current) return '';
@@ -375,17 +352,12 @@ export function useGame(feedback) {
       window.pond.onState(receiveState),
       window.pond.onClock(receiveClock),
       window.pond.onInfo(receiveInfo),
-      window.pond.onAnalysis(receiveAnalysis),
-      window.pond.onLogs((value) => {
-        logs.value = value;
-      })
+      window.pond.onAnalysis(receiveAnalysis)
     );
     void feedback.action(async () => {
       const initial = await window.pond.initial();
       if (disposed) return;
       catalog.value = initial.engines;
-      directory.value = initial.directory;
-      logs.value = initial.logs;
       receiveState(initial.state);
       receiveAnalysis(initial.analysis);
     });
@@ -408,14 +380,11 @@ export function useGame(feedback) {
     liveSearches,
     evaluations,
     catalog,
-    directory,
-    logs,
     selected,
     flipped,
     promotionMove,
     draggedMove,
     submitting,
-    starting,
     reviewPly,
     reviewTarget,
     clock,
@@ -425,7 +394,6 @@ export function useGame(feedback) {
     humanTurn,
     names,
     searches,
-    heading,
     status,
     resetReview,
     submit,

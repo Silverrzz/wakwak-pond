@@ -4,7 +4,7 @@ import { usePond } from '../shared/context';
 import { formatScore } from '../shared/format';
 import SearchPane from './SearchPane.vue';
 
-const { game, commands } = usePond();
+const { game } = usePond();
 const { analysis, analysisBusy, submitting, catalog, state } = game;
 const busy = computed(() => analysisBusy.value || submitting.value);
 const position = computed(() => analysis.value.frame);
@@ -19,7 +19,6 @@ const searchState = computed(() => ({
   ...state.value,
   searches: { [position.value?.turn]: analysis.value.search }
 }));
-const searching = computed(() => ['starting', 'searching'].includes(analysis.value.phase));
 const status = computed(
   () =>
     ({
@@ -53,7 +52,14 @@ function settings(data) {
           </option>
         </select>
       </label>
-      <label v-if="analysis.maxLines > 1" class="analysis-lines">
+      <label
+        class="analysis-lines"
+        :title="
+          analysis.maxLines > 1
+            ? 'MultiPV analysis lines'
+            : 'The loaded engine does not support multiple analysis lines (UCI MultiPV).'
+        "
+      >
         <select
           aria-label="Number of analysis lines"
           :value="analysis.lines"
@@ -65,14 +71,6 @@ function settings(data) {
           </option>
         </select>
       </label>
-      <button v-if="!catalog.length" @click="commands.engines">Add engine</button>
-      <button
-        v-else
-        :disabled="busy || !analysis.engineId || !!position?.result"
-        @click="settings({ running: !searching })"
-      >
-        {{ searching ? 'Stop' : analysis.phase === 'error' ? 'Retry' : 'Analyze' }}
-      </button>
     </div>
     <div
       v-if="status"

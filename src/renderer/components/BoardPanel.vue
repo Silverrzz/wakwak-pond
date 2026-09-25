@@ -2,6 +2,7 @@
 import { usePond } from '../shared/context';
 import ChessBoard from './ChessBoard.vue';
 import PlayerBar from './PlayerBar.vue';
+import EvaluationBar from './EvaluationBar.vue';
 
 const { game } = usePond();
 const { state, frame, analysis, flipped, reviewPly, status, submitting } = game;
@@ -12,7 +13,10 @@ const { state, frame, analysis, flipped, reviewPly, status, submitting } = game;
     <div class="board-stage">
       <div class="board-content">
         <PlayerBar id="top-player" :side="flipped ? 'w' : 'b'" />
-        <ChessBoard />
+        <div class="board-row" :class="{ 'with-evaluation': analysis.enabled }">
+          <EvaluationBar v-if="analysis.enabled" />
+          <ChessBoard />
+        </div>
         <PlayerBar id="bottom-player" :side="flipped ? 'b' : 'w'" />
       </div>
     </div>

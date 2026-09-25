@@ -1,5 +1,4 @@
-﻿const { performance } = require('node:perf_hooks');
-
+﻿
 function number(value, min, max, label) {
   if (!Number.isInteger(value) || value < min || value > max)
     throw new Error(`${label} must be an integer from ${min} to ${max}.`);
@@ -176,4 +175,4 @@ class GameClock {
   }
 }
 
-module.exports = { GameClock, normalizeControl };
+export { GameClock, normalizeControl };

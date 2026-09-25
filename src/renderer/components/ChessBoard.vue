@@ -107,7 +107,9 @@ function arrowShape(mark) {
   const length = Math.hypot(end.x - elbow.x, end.y - elbow.y) || 1;
   const ux = (end.x - elbow.x) / length,
     uy = (end.y - elbow.y) / length;
-  const neck = { x: end.x - ux * 0.34, y: end.y - uy * 0.34 };
+  const headLength = mark.rank ? 0.22 : 0.34;
+  const headWidth = mark.rank ? 0.13 : 0.24;
+  const neck = { x: end.x - ux * headLength, y: end.y - uy * headLength };
   return {
     ...mark,
     key: `${mark.from}-${mark.to}`,
@@ -115,7 +117,7 @@ function arrowShape(mark) {
     end,
     circle: mark.from === mark.to,
     path: `M${start.x} ${start.y}${knight ? `L${elbow.x} ${elbow.y}` : ''}L${neck.x} ${neck.y}`,
-    head: `${end.x},${end.y} ${neck.x - uy * 0.24},${neck.y + ux * 0.24} ${neck.x + uy * 0.24},${neck.y - ux * 0.24}`
+    head: `${end.x},${end.y} ${neck.x - uy * headWidth},${neck.y + ux * headWidth} ${neck.x + uy * headWidth},${neck.y - ux * headWidth}`
   };
 }
 
@@ -131,20 +133,32 @@ const suggestions = computed(() => {
   const seen = new Set();
   const marks = [];
   const at = (name) => 'abcdefgh'.indexOf(name[0]) + (Number(name[1]) - 1) * 8;
+  function addMark(from, to, knight, rank, duck = false) {
+    const key = `${duck ? 'duck' : 'piece'}-${from}-${to}`;
+    if (seen.has(key)) return;
+    seen.add(key);
+    marks.push({
+      ...arrowShape({ from, to, knight, rank, duck }),
+      key,
+      opacity: Math.max(0.16, 0.68 * 0.62 ** (rank - 1))
+    });
+  }
   for (const [rank, row] of [...rows].sort(([a], [b]) => a - b)) {
     const move = row.pv.split(/\s+/)[0];
     const match = /^([a-h][1-8])([a-h][1-8])([qrbn])?(?:@([a-h][1-8]))?$/.exec(move);
     if (!match) continue;
-    let from,
-      to,
-      knight = false;
     if (pending.value) {
       if (!match[4] || move.split('@')[0] !== pending.value.notation) continue;
-      to = at(match[4]);
+      const to = at(match[4]);
       if (frame.value.board[to] || to === frame.value.duck) continue;
-      from = frame.value.duck < 0 ? to : frame.value.duck;
+      addMark(
+        pending.value.from,
+        pending.value.to,
+        frame.value.board[pending.value.to]?.toLowerCase() === 'n' && !match[3],
+        rank
+      );
     } else {
-      from = at(match[1]);
+      const from = at(match[1]);
       const legal = boardState.value.legal.find(
         (candidate) =>
           candidate.from === from &&
@@ -152,22 +166,18 @@ const suggestions = computed(() => {
           candidate.promotion === match[3]
       );
       if (!legal) continue;
-      to = legal.castle?.kingTo ?? legal.to;
-      knight = frame.value.board[from]?.toLowerCase() === 'n';
-    }
-    const key = `${from}-${to}`;
-    if (seen.has(key)) continue;
-    seen.add(key);
-    marks.push(
-      arrowShape({
+      addMark(
         from,
-        to,
-        knight,
-        rank,
-        duck: !!pending.value,
-        opacity: Math.max(0.18, 0.9 * 0.62 ** (rank - 1))
-      })
-    );
+        legal.castle?.kingTo ?? legal.to,
+        frame.value.board[from]?.toLowerCase() === 'n',
+        rank
+      );
+    }
+    if (match[4]) {
+      const to = at(match[4]);
+      if (to !== frame.value.duck)
+        addMark(frame.value.duck < 0 ? to : frame.value.duck, to, false, rank, true);
+    }
   }
   return marks.reverse();
 });
@@ -408,7 +418,7 @@ onUnmounted(() => {
           :class="{ 'duck-suggestion': mark.duck }"
           :style="{ opacity: mark.opacity }"
         >
-          <circle v-if="mark.circle || mark.duck" :cx="mark.end.x" :cy="mark.end.y" r=".32" />
+          <circle v-if="mark.circle" :cx="mark.end.x" :cy="mark.end.y" r=".18" />
           <template v-if="!mark.circle">
             <path :d="mark.path" />
             <polygon :points="mark.head" />

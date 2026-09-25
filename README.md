@@ -1,8 +1,3 @@
-# The Pond
+# The Pond Public Site
 
-with Node.js 22.12+ and npm, run from the project folder:
-
-```sh
-npm ci
-npm run start
-```
+This repo is a 'fork' of https://github.com/Silverrzz/pond intended to work as a publicly hosted site for people to play against WakWak.

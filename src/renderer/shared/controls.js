@@ -1,19 +1,3 @@
-export const variants = [
-  { value: 'duck', label: 'Duck' },
-  { value: 'duck960', label: 'Duck960' },
-  { value: 'duckdfrc', label: 'Duck double FRC' }
-];
-export const timePresets = [
-  { value: '3+2', label: '3 min + 2 sec' },
-  { value: '5+3', label: '5 min + 3 sec' },
-  { value: '10+0', label: '10 min' },
-  { value: '15+10', label: '15 min + 10 sec' },
-  { value: '90+30', label: '90 min + 30 sec' },
-  { value: 'staged', label: '40/90, then 30 min + 30 sec' },
-  { value: 'custom', label: 'Custom…' },
-  { value: 'movetime', label: 'Time per move' },
-  { value: 'unlimited', label: 'Unlimited' }
-];
 export const clockModes = [
   { value: 'clock', label: 'Game clock' },
   { value: 'movetime', label: 'Fixed time per move' },
