@@ -1,0 +1,37 @@
+@use 'mixins';
+
+.app-header {
+  height: 37px;
+  @include mixins.row;
+  padding: 0 var(--space-3);
+  background: var(--surface-raised);
+  border-bottom: 1px solid var(--line);
+}
+.app-header nav {
+  @include mixins.row(var(--space-1));
+}
+.separator {
+  height: 18px;
+  width: 1px;
+  background: var(--line);
+  margin: 0 var(--space-1);
+}
+.workspace {
+  --board-column: 46%;
+  --moves-column: 20%;
+  --graph-height: 175px;
+  display: grid;
+  grid-template-columns: var(--board-column) 7px var(--moves-column) 7px minmax(0, 1fr);
+  grid-template-rows: minmax(0, 1fr) 7px var(--graph-height);
+  width: calc(100% - 76px);
+  max-width: 1800px;
+  height: calc(100vh - 110px);
+  margin: 16px auto 54px;
+  align-items: stretch;
+}
+.board-column,
+.game-panel,
+.output-panel,
+.graph-panel {
+  @include mixins.panel;
+}

@@ -1,0 +1,43 @@
+$spacing: (
+  1: 4px,
+  2: 8px,
+  3: 12px,
+  4: 16px
+);
+
+:root {
+  color-scheme: dark;
+  --font-ui: 'Segoe UI', sans-serif;
+  --font-mono: Consolas, monospace;
+  --text-size: 12px;
+  --text-small: 11px;
+  --text-micro: 10px;
+  --surface: #242424;
+  --surface-raised: #2c2c2c;
+  --surface-input: #1d1d1d;
+  --surface-hover: #383838;
+  --surface-selected: #484848;
+  --text: #dedede;
+  --text-strong: #ffffff;
+  --text-muted: #a3a3a3;
+  --text-disabled: #787878;
+  --line: #424242;
+  --line-strong: #666666;
+  --focus: #d4d4d4;
+  --control-height: 28px;
+  --radius: 2px;
+  @each $step, $size in $spacing {
+    --space-#{$step}: #{$size};
+  }
+  --shadow: 0 8px 28px #0006;
+  --graph-grid: #333333;
+  --graph-zero: #626262;
+  --graph-cursor: #bfbfbf;
+  --graph-w: #eeeeee;
+  --graph-b: #929292;
+  --light-square: #e4d5b7;
+  --dark-square: #9a7958;
+  font: var(--text-size)/1.5 var(--font-ui);
+  color: var(--text);
+  background: var(--surface-input);
+}

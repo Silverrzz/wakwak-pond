@@ -1,0 +1,316 @@
+@use 'mixins';
+
+.board-column {
+  grid-column: 1;
+  grid-row: 1;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) 30px;
+  overflow: hidden;
+}
+.board-stage {
+  display: grid;
+  place-items: center;
+  min-width: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+.board-content {
+  width: var(--board-size, 100%);
+  max-width: 100%;
+  min-width: 0;
+}
+.board-wrap {
+  position: relative;
+}
+.board {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  width: 100%;
+  aspect-ratio: 1;
+  overflow: hidden;
+}
+.square {
+  position: relative;
+  display: grid;
+  place-items: center;
+  border: 0;
+  padding: 0;
+  border-radius: 0;
+  min-width: 0;
+  height: auto;
+  aspect-ratio: 1;
+  background: var(--light-square);
+  cursor: default;
+  touch-action: manipulation;
+}
+.square.dark {
+  background: var(--dark-square);
+}
+.square:hover:not(:disabled) {
+  background: var(--light-square);
+  border: 0;
+}
+.square.dark:hover:not(:disabled) {
+  background: var(--dark-square);
+}
+.board.interactive .square {
+  cursor: pointer;
+}
+.square.last,
+.square.last:hover:not(:disabled) {
+  background: #dfcf8c;
+}
+.square.dark.last,
+.square.dark.last:hover:not(:disabled) {
+  background: #b7a363;
+}
+.square.selected,
+.square.selected:hover:not(:disabled) {
+  background: #d8c78d;
+  box-shadow: inset 0 0 0 3px #75633e;
+}
+.square.duck-last {
+  box-shadow: inset 0 0 0 3px #b59337;
+}
+.square.legal::after {
+  content: '';
+  position: absolute;
+  width: 21%;
+  height: 21%;
+  background: #3336;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 2;
+}
+.square.legal:has(.piece)::after {
+  width: 88%;
+  height: 88%;
+  background: transparent;
+  border: 5px solid #3337;
+}
+.board.duck-turn .square.legal::after {
+  width: 12%;
+  height: 12%;
+  background: #6c531a9c;
+}
+.square:focus-visible {
+  outline: 3px solid var(--surface-input);
+  outline-offset: -3px;
+  z-index: 4;
+}
+.piece {
+  width: 86%;
+  height: 86%;
+  user-select: none;
+  pointer-events: none;
+  z-index: 1;
+}
+.piece.duck {
+  width: 75%;
+  height: 75%;
+}
+.coordinate {
+  position: absolute;
+  font-size: clamp(9px, 1vw, 12px);
+  line-height: 1;
+  font-weight: 600;
+  color: #725739;
+  pointer-events: none;
+  z-index: 2;
+}
+.dark .coordinate {
+  color: #f5e8d0;
+}
+.rank {
+  top: 4px;
+  left: 4px;
+}
+.file {
+  bottom: 3px;
+  right: 4px;
+}
+.player-bar {
+  @include mixins.row(var(--space-2));
+  height: 32px;
+  padding-left: var(--space-2);
+}
+.player-name {
+  font-weight: 500;
+  @include mixins.ellipsis;
+}
+.clock-group {
+  @include mixins.row(var(--space-2));
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.clock-detail {
+  color: var(--text-muted);
+  font-size: var(--text-micro);
+  white-space: pre-line;
+  text-align: right;
+  line-height: 1.3;
+}
+.clock {
+  display: block;
+  min-width: 96px;
+  height: 30px;
+  padding: 0 var(--space-2);
+  text-align: right;
+  background: var(--surface-input);
+  font: 22px/30px var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+.player-bar.active .clock {
+  background: var(--text);
+  color: var(--surface-input);
+}
+.player-bar.low .clock {
+  color: var(--text-strong);
+  background: var(--surface-selected);
+  font-weight: 700;
+  box-shadow: inset 0 0 0 1px var(--text-muted);
+}
+.player-bar.active.low .clock {
+  background: var(--text-strong);
+  color: var(--surface-input);
+}
+.board-footer {
+  @include mixins.row(var(--space-1));
+  height: 30px;
+  padding: 0 var(--space-1) 0 var(--space-2);
+  border-top: 1px solid var(--line);
+  font-size: var(--text-small);
+}
+#turn-status {
+  min-width: 0;
+  @include mixins.ellipsis;
+}
+#turn-status.duck-phase {
+  color: var(--text-strong);
+  font-weight: 600;
+}
+#flip {
+  margin-left: auto;
+}
+
+.board {
+  position: relative;
+  isolation: isolate;
+  user-select: none;
+  touch-action: none;
+}
+.board .square {
+  touch-action: none;
+}
+.board.interactive .square.draggable {
+  cursor: grab;
+}
+.board.dragging .square,
+.board.dragging .square.draggable {
+  cursor: grabbing;
+}
+.board.drawing .square,
+.board.drawing .square.draggable {
+  cursor: crosshair;
+}
+.square.drag-target {
+  box-shadow: inset 0 0 0 3px #f8efca99;
+}
+.piece.piece-hidden {
+  visibility: hidden;
+}
+.moving-piece,
+.dragged-piece {
+  position: absolute;
+  display: grid;
+  place-items: center;
+  width: 12.5%;
+  height: 12.5%;
+  pointer-events: none;
+}
+.moving-piece {
+  z-index: 5;
+  animation: board-piece-move 180ms cubic-bezier(0.2, 0.65, 0.3, 1) both;
+  will-change: transform;
+}
+.moving-piece.entering {
+  animation-name: board-piece-enter;
+}
+.dragged-piece {
+  z-index: 7;
+  transform: translate(-50%, -50%);
+  filter: drop-shadow(0 5px 4px #0005);
+}
+.board-annotations,
+.board-suggestions {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 6;
+  pointer-events: none;
+  overflow: visible;
+}
+.board-annotations g {
+  opacity: 0.82;
+}
+.board-annotations g.preview {
+  opacity: 0.6;
+}
+.board-annotations path,
+.board-annotations circle {
+  fill: none;
+  stroke: #f39a32;
+  stroke-width: 0.14;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.board-annotations circle {
+  stroke-width: 0.1;
+}
+.board-annotations polygon {
+  fill: #f39a32;
+}
+.board-suggestions {
+  --suggestion-color: #197454;
+}
+.board-suggestions .duck-suggestion {
+  --suggestion-color: #235ab4;
+}
+.board-suggestions path,
+.board-suggestions circle {
+  fill: none;
+  stroke: var(--suggestion-color);
+  stroke-width: 0.16;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.board-suggestions circle {
+  stroke-width: 0.1;
+}
+.board-suggestions polygon {
+  fill: var(--suggestion-color);
+}
+@keyframes board-piece-move {
+  from {
+    transform: translate(var(--move-x), var(--move-y));
+  }
+  to {
+    transform: translate(0, 0);
+  }
+}
+@keyframes board-piece-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.75);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .moving-piece {
+    animation-duration: 1ms;
+  }
+}

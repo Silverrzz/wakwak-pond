@@ -1,0 +1,8 @@
+**/*.md
+node_modules/
+dist/
+renderer-dist/
+.cache/
+engines/
+src/pieces/
+package-lock.json

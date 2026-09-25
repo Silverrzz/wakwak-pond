@@ -1,0 +1,55 @@
+.graph-legend {
+  display: flex;
+  gap: var(--space-3);
+  margin-left: auto;
+  font-size: var(--text-small);
+  white-space: nowrap;
+}
+.graph-legend span::before {
+  content: '';
+  width: 16px;
+  display: inline-block;
+  vertical-align: 3px;
+  margin-right: var(--space-1);
+  border-top: 2px var(--legend-style, solid) var(--legend-color);
+}
+.legend-w {
+  --legend-color: var(--graph-w);
+}
+.legend-b {
+  --legend-color: var(--graph-b);
+  --legend-style: dashed;
+}
+.graph-plot {
+  position: relative;
+  min-height: 0;
+  flex: 1;
+}
+#eval-graph {
+  display: block;
+  width: 100%;
+  height: 100%;
+  cursor: crosshair;
+}
+.graph-empty {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.graph-tooltip {
+  position: absolute;
+  padding: var(--space-1) var(--space-2);
+  font: var(--text-small)/1.5 var(--font-mono);
+  background: var(--text);
+  color: var(--surface-input);
+  border: 1px solid var(--line-strong);
+  box-shadow: var(--shadow);
+  pointer-events: none;
+  max-width: calc(100% - 8px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  z-index: 2;
+}

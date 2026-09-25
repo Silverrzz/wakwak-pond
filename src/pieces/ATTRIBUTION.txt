@@ -1,0 +1,8 @@
+Cburnett chess pieces
+Copyright Colin M. L. Burnett
+License: GNU General Public License version 2 or later (see COPYING.txt).
+Source: https://github.com/lichess-org/lila/tree/master/public/piece/cburnett
+License reference: https://github.com/lichess-org/lila/blob/master/COPYING.md
+The twelve chess piece SVGs are distributed unmodified; filenames are lowercase.
+These SVG files are their preferred editable source form.
+The duck SVG and pond scenery are original artwork for The Pond.

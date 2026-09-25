@@ -1,0 +1,217 @@
+@use 'mixins';
+
+.game-searches {
+  --white-size: 50%;
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-rows: minmax(0, var(--white-size)) 5px minmax(0, 1fr);
+  overflow: hidden;
+}
+.search-pane {
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.search-heading {
+  justify-content: space-between;
+  min-height: 28px;
+  font-size: var(--text-small);
+}
+.search-name {
+  font-weight: 500;
+  @include mixins.ellipsis;
+}
+.search-heading.searching .search-name::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--text-strong);
+  margin-right: 6px;
+  vertical-align: 2px;
+}
+.search-scroll {
+  min-height: 0;
+  flex: 1;
+  overflow: auto;
+}
+.search-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  min-width: 450px;
+  table-layout: fixed;
+  font: var(--text-small)/1.5 var(--font-mono);
+}
+.search-table th,
+.search-table td {
+  height: 28px;
+  padding: var(--space-1) var(--space-2);
+  text-align: right;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.search-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  background: var(--surface-raised);
+  color: var(--text-muted);
+  font: var(--text-small)/1.5 var(--font-ui);
+  border-bottom: 1px solid var(--line);
+}
+.search-table th:nth-child(1) {
+  width: 54px;
+}
+.search-table th:nth-child(2),
+.search-table th:nth-child(3) {
+  width: 58px;
+}
+.search-table th:nth-child(4),
+.search-table th:nth-child(5) {
+  width: 62px;
+}
+.search-table th:last-child,
+.search-table td:last-child {
+  text-align: left;
+}
+.search-table tbody tr {
+  cursor: pointer;
+}
+.search-table tbody tr:hover td {
+  background: var(--surface-hover);
+}
+.move.active,
+.move.active:hover:not(:disabled),
+.engine-list button.active,
+.engine-list button.active:hover:not(:disabled),
+.search-table tr.selected-row td {
+  color: var(--text-strong);
+  background: var(--surface-selected);
+  border-color: transparent;
+}
+.search-variation {
+  padding: var(--space-2);
+  max-height: 100px;
+  overflow: auto;
+  font: var(--text-small)/1.7 var(--font-mono);
+  overflow-wrap: anywhere;
+  background: var(--surface-raised);
+  border-top: 1px solid var(--line);
+  user-select: text;
+  flex: 0 0 auto;
+}
+.search-status {
+  padding: var(--space-1) var(--space-2);
+  font-size: var(--text-small);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-top: 1px solid var(--line);
+  min-height: 24px;
+  flex: 0 0 auto;
+}
+.search-status:empty {
+  display: none;
+}
+
+.analysis-panel {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-height: 0;
+  overflow: auto;
+}
+.analysis-controls,
+.analysis-branch-controls {
+  display: flex;
+  gap: var(--space-2);
+  align-items: center;
+  padding: var(--space-2);
+}
+.analysis-controls {
+  flex-wrap: wrap;
+  background: var(--surface-raised);
+  border-bottom: 1px solid var(--line);
+}
+.analysis-engine {
+  flex: 1;
+  min-width: 100px;
+}
+.analysis-lines {
+  width: 76px;
+}
+.analysis-score {
+  font: 600 22px/1.2 var(--font-mono);
+  min-width: 58px;
+}
+.analysis-message {
+  padding: 0 var(--space-2) var(--space-2);
+  color: var(--text-muted);
+  overflow-wrap: anywhere;
+}
+.analysis-error {
+  color: var(--text-strong);
+}
+.analysis-branch {
+  border-block: 1px solid var(--line);
+  padding: 0 var(--space-2) var(--space-2);
+}
+.analysis-branch-controls {
+  padding-inline: 0;
+  justify-content: flex-end;
+}
+.analysis-branch-moves {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1) var(--space-2);
+  max-height: 80px;
+  overflow: auto;
+  font-family: var(--font-mono);
+}
+.analysis-panel > .search-pane {
+  flex: 1 0 140px;
+}
+.analysis-panel > :not(.search-pane) {
+  flex-shrink: 0;
+}
+.app-header button[aria-pressed='true'] {
+  background: var(--surface-selected);
+  color: var(--text-strong);
+}
+
+.output-panel > .dock-heading {
+  justify-content: space-between;
+}
+.search-table tr.expanded-variation td:last-child {
+  white-space: normal;
+  overflow-wrap: anywhere;
+  user-select: text;
+}
+
+.analysis-source-controls,
+.analysis-import-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-1);
+}
+.analysis-import {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--line);
+}
+.analysis-import textarea {
+  width: 100%;
+  margin-top: var(--space-2);
+  resize: vertical;
+  font-family: var(--font-mono);
+}
+.analysis-import-controls select {
+  width: auto;
+  margin-right: auto;
+}

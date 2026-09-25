@@ -1,0 +1,143 @@
+* {
+  box-sizing: border-box;
+  scrollbar-width: thin;
+  scrollbar-color: var(--line-strong) transparent;
+}
+body {
+  margin: 0;
+  min-width: 720px;
+  height: 100vh;
+  overflow: hidden;
+  background: url('../../pond.svg') center / cover fixed;
+}
+button,
+input,
+select,
+textarea {
+  font: var(--text-size)/1.5 var(--font-ui);
+  color: var(--text);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+}
+button,
+input:not([type='checkbox']),
+select {
+  height: var(--control-height);
+  padding: var(--space-1) var(--space-2);
+  line-height: 18px;
+}
+button {
+  background: var(--surface-raised);
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+button:hover:not(:disabled) {
+  background: var(--surface-hover);
+  border-color: var(--text-muted);
+}
+button:active:not(:disabled) {
+  background: var(--surface-selected);
+}
+input,
+select,
+textarea {
+  width: 100%;
+  min-width: 0;
+  background: var(--surface-input);
+}
+select {
+  text-overflow: ellipsis;
+}
+option {
+  background: var(--surface-input);
+  color: var(--text);
+}
+option:checked {
+  background: var(--surface-selected);
+  color: var(--text-strong);
+}
+textarea {
+  display: block;
+  padding: var(--space-2);
+  resize: vertical;
+  font: var(--text-size)/1.6 var(--font-mono);
+}
+input[type='checkbox'] {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+  flex: 0 0 14px;
+  accent-color: var(--text);
+}
+:where(button, input, select, textarea):disabled {
+  color: var(--text-disabled);
+  border-color: var(--line);
+  cursor: default;
+}
+:where(button, input, select, textarea, summary, canvas, [tabindex]):focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+}
+:where(input, select, textarea):focus {
+  border-color: var(--focus);
+}
+button.primary {
+  background: var(--text);
+  border-color: var(--text);
+  color: var(--surface-input);
+}
+button.primary:hover:not(:disabled) {
+  background: var(--text-strong);
+  border-color: var(--text-strong);
+}
+button.primary:focus-visible {
+  outline-color: var(--surface-input);
+  outline-offset: -3px;
+}
+button.primary:disabled {
+  background: var(--surface-selected);
+  border-color: var(--line-strong);
+  color: var(--text-muted);
+}
+:where(.app-header, .board-footer, .move-navigation, .dialog-heading) button,
+button.quiet {
+  background: transparent;
+  border-color: transparent;
+}
+label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  min-width: 0;
+}
+h1,
+h2,
+h3,
+p,
+dl {
+  margin: 0;
+}
+h1,
+h3 {
+  font-size: var(--text-size);
+  font-weight: 600;
+}
+h2 {
+  font-size: 14px;
+  font-weight: 600;
+}
+dt,
+.hint,
+.directory,
+.graph-perspective,
+.graph-empty {
+  color: var(--text-muted);
+  font-size: var(--text-small);
+}
+dd {
+  margin: 0;
+}
+.hint {
+  line-height: 1.5;
+}

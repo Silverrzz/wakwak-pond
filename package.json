@@ -1,0 +1,27 @@
+{
+  "name": "the-pond",
+  "version": "1.0.0",
+  "description": "A desktop duck chess and Duck960 workspace with advanced clocks and UCI engines",
+  "author": "Silverrzz",
+  "private": true,
+  "main": "src/main.js",
+  "scripts": {
+    "prestart": "npm run build",
+    "start": "electron .",
+    "build": "vite build",
+    "format": "prettier --write src package.json .prettierrc.json vite.config.mjs"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "6.0.9",
+    "electron": "44.3.0",
+    "prettier": "3.9.7",
+    "sass": "1.104.1",
+    "vite": "8.3.0",
+    "vue": "3.5.43"
+  },
+  "license": "UNLICENSED",
+  "repository": "github:Silverrzz/the-pond",
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

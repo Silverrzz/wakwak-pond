@@ -1,0 +1,53 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" width="1920" height="1080" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+<defs>
+  <linearGradient id="water" x1="0" y1="0" x2=".8" y2="1"><stop stop-color="#234d4b"/><stop offset=".4" stop-color="#427f78"/><stop offset="1" stop-color="#163e3d"/></linearGradient>
+  <radialGradient id="light"><stop stop-color="#aad1b0" stop-opacity=".2"/><stop offset="1" stop-color="#699d8e" stop-opacity="0"/></radialGradient>
+  <linearGradient id="leaf" x1="0" x2=".5" y2="1"><stop stop-color="#95ad59"/><stop offset=".5" stop-color="#607e42"/><stop offset="1" stop-color="#385e38"/></linearGradient>
+  <linearGradient id="reed" x1="0" x2="1"><stop stop-color="#2c5135"/><stop offset=".5" stop-color="#9baf60"/><stop offset="1" stop-color="#4f7042"/></linearGradient>
+  <g id="pad">
+    <ellipse cy="8" rx="70" ry="42" fill="#0f3532" opacity=".5"/>
+    <ellipse cy="9" rx="85" ry="47" fill="none" stroke="#9ec2a8" stroke-opacity=".16" stroke-width="1.4"/>
+    <path d="M0 0 56-27C25-59-50-45-66-14C-89 25-16 60 42 29C63 18 73-4 65-16Z" fill="url(#leaf)" stroke="#aec179" stroke-opacity=".36" stroke-width="1.5"/>
+    <path d="M0 0-57-13M0 0-37-34M0 0 5-36M0 0-42 24M0 0 4 36M0 0 49 18" fill="none" stroke="#bfd081" stroke-opacity=".24"/>
+    <path d="M0 0 56-27" stroke="#c3d189" stroke-opacity=".65"/>
+  </g>
+  <g id="flower">
+    <ellipse cy="11" rx="27" ry="9" fill="#153b35" opacity=".4"/>
+    <g fill="#d1b6ba" stroke="#efe0d1" stroke-width=".6"><path d="M0 9C-26 8-30-11-29-11C-14-11-3-4 0 9Z"/><path d="M0 9C26 8 30-11 29-11C14-11 3-4 0 9Z"/><path d="M0 9C-18 1-20-23-18-23C-7-18-1-7 0 9Z"/><path d="M0 9C18 1 20-23 18-23C7-18 1-7 0 9Z"/><path d="M0 9C-13-6-4-31 0-31C4-31 13-6 0 9Z"/></g>
+    <path d="M-13 5Q0-17 13 5Q0 15-13 5" fill="#efe3cf"/><ellipse cy="4" rx="6" ry="4" fill="#cfab52"/>
+  </g>
+  <g id="reeds">
+    <path d="M5 255Q14 103-3 27M31 262Q61 90 37-4M51 267Q69 159 100 97M-8 262Q-5 142-43 91M66 268Q98 153 106 40" stroke="url(#reed)" stroke-width="4" fill="none"/>
+    <path d="M20 271Q-14 139-65 120Q-12 161 12 272M30 270Q29 119 8 84Q12 174 24 272M47 272Q92 110 153 93Q87 147 56 275M62 274Q117 197 146 188Q104 239 74 276M-4 272Q-60 211-91 198Q-39 249 2 279" fill="url(#reed)"/>
+    <path d="M-3 27-5-4M37-4 32-34M106 40 105 9" stroke="#333d26" stroke-width="2"/>
+    <path d="M-3 27-4 2M37-4 34-29M106 40 105 15" stroke="#645339" stroke-width="10" stroke-linecap="round"/>
+    <path d="M-5 27-6 3M35-4 32-28M104 39 103 16" stroke="#ab8851" stroke-opacity=".5" stroke-width="2" stroke-linecap="round"/>
+  </g>
+</defs>
+<path fill="url(#water)" d="M0 0h1920v1080H0z"/>
+<ellipse cx="560" cy="270" rx="1050" ry="680" fill="url(#light)"/>
+<g fill="none" stroke="#afd0b8" stroke-opacity=".12">
+  <path d="M-30 153Q85 135 198 150T433 149M1180 76Q1290 63 1420 77T1760 73M1520 315Q1680 301 1970 321M-20 653Q100 639 250 653M40 869Q120 855 297 870M1240 983Q1490 965 1830 989"/>
+  <path d="M0 284Q169 268 388 291M-10 478Q137 493 307 477M1421 462Q1643 442 1960 466M1502 716Q1738 693 1950 720M367 1036Q665 1017 973 1034"/>
+  <ellipse cx="86" cy="743" rx="115" ry="21"/><ellipse cx="86" cy="743" rx="143" ry="29"/>
+  <ellipse cx="1814" cy="214" rx="120" ry="25"/><ellipse cx="1814" cy="214" rx="153" ry="35"/>
+  <ellipse cx="1250" cy="1047" rx="205" ry="19"/>
+</g>
+<g opacity=".32" fill="#b4c8a0"><ellipse cx="73" cy="474" rx="23" ry="1"/><ellipse cx="1805" cy="409" rx="41" ry="1"/><ellipse cx="177" cy="921" rx="45" ry="1"/><ellipse cx="1546" cy="1054" rx="46" ry="1"/></g>
+<use href="#pad" transform="translate(38 224) rotate(-16) scale(.9)"/>
+<use href="#pad" transform="translate(119 161) rotate(24) scale(.48)"/>
+<use href="#pad" transform="translate(1816 173) rotate(165) scale(.85)"/>
+<use href="#pad" transform="translate(1902 243) rotate(-22) scale(.65)"/>
+<use href="#flower" transform="translate(1804 165) scale(.8)"/>
+<use href="#pad" transform="translate(48 715) rotate(27) scale(.7)"/>
+<use href="#pad" transform="translate(126 985) rotate(-12) scale(1.1)"/>
+<use href="#pad" transform="translate(272 1046) rotate(26) scale(.73)"/>
+<use href="#flower" transform="translate(119 974) scale(.92)"/>
+<use href="#pad" transform="translate(1757 959) rotate(158) scale(.9)"/>
+<use href="#pad" transform="translate(1872 875) rotate(195) scale(.65)"/>
+<use href="#pad" transform="translate(1539 1057) rotate(14) scale(.52)"/>
+<use href="#reeds" transform="translate(9 830) rotate(-5)"/>
+<use href="#reeds" transform="translate(-11 942) scale(.7)"/>
+<use href="#reeds" transform="translate(1924 796) scale(-1.13 1.13)"/>
+<use href="#reeds" transform="translate(1863 962) scale(-.58 .58)"/>
+</svg>
