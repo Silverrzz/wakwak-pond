@@ -13,7 +13,8 @@ export class EvaluationGraph {
   }
 
   update(state, ply, scale) {
-    if (this.state?.id !== state?.id) this.hover = null;
+    if (this.state?.id !== state?.id || this.state?.analysisNodeId !== state?.analysisNodeId)
+      this.hover = null;
     this.state = state;
     this.ply = ply;
     this.scale = scale;

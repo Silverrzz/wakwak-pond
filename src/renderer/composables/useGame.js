@@ -5,8 +5,14 @@ import { sideName } from '../shared/format';
 export function useGame(feedback) {
   const liveState = shallowRef(null);
   const state = computed(() =>
-    analysis.value.enabled && analysis.value.source
-      ? { ...liveState.value, ...analysis.value.source }
+    analysis.value.enabled
+      ? {
+          ...liveState.value,
+          ...analysis.value.source,
+          moves: analysis.value.branch.map((record) => record.uci),
+          records: analysis.value.branch,
+          analysisNodeId: analysis.value.nodeId
+        }
       : liveState.value
   );
   const analysis = shallowRef({ enabled: false });
@@ -42,7 +48,7 @@ export function useGame(feedback) {
   );
   const ply = computed(() =>
     analysis.value.enabled
-      ? analysis.value.rootPly
+      ? analysis.value.frame.moves.length
       : (reviewPly.value ?? state.value?.moves.length ?? 0)
   );
   const humanTurn = computed(
@@ -315,23 +321,19 @@ export function useGame(feedback) {
   async function review(value) {
     if (!state.value) return;
     if (analysisBusy.value || submitting.value) return;
+    if (analysis.value.enabled) {
+      if (analysis.value.frame.pending && value === ply.value - 1)
+        await analysisAction('analysisBack');
+      else await analysisAction('analysisNavigate', { ply: value });
+      return;
+    }
     draggedMove.value = null;
     const token = ++reviewToken;
     const target = Math.max(0, Math.min(value, state.value.moves.length));
     reviewTarget.value = target;
     selected.value = null;
     promotionMove.value = null;
-    if (analysis.value.enabled && analysis.value.source) {
-      if (await startAnalysis(target)) reviewPly.value = target;
-      reviewTarget.value = null;
-      return;
-    }
     const next = await feedback.action(() => window.pond.review(target));
-    if (disposed || token !== reviewToken) return;
-    if (next && analysis.value.enabled && !(await startAnalysis(target))) {
-      reviewTarget.value = null;
-      return;
-    }
     if (disposed || token !== reviewToken) return;
     reviewTarget.value = null;
     if (next) {

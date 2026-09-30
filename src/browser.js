@@ -86,6 +86,7 @@ window.pond = {
   },
   stopAnalysis: async () => analysis.close(),
   analysisMove: async (data) => analysis.move(data),
+  analysisNavigate: async (data) => analysis.navigate(data),
   analysisBack: async (data) => analysis.back(data),
   analysisReset: async (data) => analysis.reset(data),
   analysisSettings: async (data) => analysis.settings(data),

@@ -8,7 +8,6 @@ const { game } = usePond();
 const { analysis, analysisBusy, submitting, catalog, state } = game;
 const busy = computed(() => analysisBusy.value || submitting.value);
 const position = computed(() => analysis.value.frame);
-const branch = computed(() => position.value?.records.slice(analysis.value.rootPly) || []);
 const principal = computed(
   () =>
     [...(analysis.value.search?.rows || [])]
@@ -87,31 +86,23 @@ function settings(data) {
         Retry analysis
       </button>
     </div>
-    <div v-if="branch.length || position?.pending" class="analysis-branch">
+    <div class="analysis-branch">
       <div class="analysis-branch-controls">
         <button
-          :disabled="busy || (!branch.length && !position?.pending)"
+          :disabled="busy || (analysis.nodeId === 0 && !position?.pending)"
           @click="game.analysisAction('analysisBack')"
         >
-          Undo
+          Back
         </button>
         <button
-          :disabled="busy || (!branch.length && !position?.pending)"
+          :disabled="busy || (analysis.nodeId === analysis.rootId && !position?.pending)"
           @click="game.analysisAction('analysisReset')"
         >
-          Reset variation
+          Return to analysis start
         </button>
       </div>
-      <div
-        v-if="branch.length || position?.pending"
-        class="analysis-branch-moves"
-        aria-label="Analysis variation"
-      >
-        <span v-for="(move, index) in branch" :key="index">
-          {{ move.number }}{{ move.side === 'w' ? '.' : '…' }} {{ move.san
-          }}{{ move.duck ? '@' + move.duck : '' }}
-        </span>
-        <span v-if="position?.pending">{{ position.pending.notation }} · place duck</span>
+      <div v-if="position?.pending" class="analysis-branch-moves">
+        <span>{{ position.pending.notation }} - place duck</span>
       </div>
     </div>
     <SearchPane

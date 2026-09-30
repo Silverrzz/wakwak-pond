@@ -193,6 +193,10 @@ function shortcut(event) {
     } else if (frame.value?.pending) void game.cancelPiece();
     return;
   }
+  if (event.key === 'Home' || event.key === 'End') {
+    event.preventDefault();
+    void game.review(event.key === 'Home' ? 0 : state.value.moves.length);
+  }
   if (event.key.toLowerCase() === 'f') game.flip();
   if (event.target.closest('.board')) return;
   if (event.key === 'ArrowLeft' || event.key === 'ArrowRight') {
@@ -408,7 +412,7 @@ onUnmounted(() => {
               Open a PGN, paste a position, or move the pieces.
             </p>
           </div>
-          <div class="move-navigation">
+          <div class="move-navigation analysis-navigation">
             <button
               aria-label="First position"
               :disabled="!ply || !canNavigate"
@@ -423,6 +427,9 @@ onUnmounted(() => {
             >
               ←
             </button>
+            <span class="move-counter" aria-label="Selected branch move count">
+              {{ ply }} / {{ state.moves.length }}
+            </span>
             <button
               aria-label="Next move"
               :disabled="ply >= state.moves.length || !canNavigate"

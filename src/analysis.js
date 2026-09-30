@@ -4,6 +4,7 @@ import { Engine } from './engine.js';
 import { SearchData } from './search-data.js';
 import { parsePgn, formatPgn } from './pgn.js';
 import { GameClock } from './clock.js';
+import { MoveTree } from './move-tree.js';
 
 const scoreValue = (row) =>
   row.scoreType === 'mate'
@@ -51,7 +52,21 @@ class Analysis extends EventEmitter {
       maxLines: this.maxLines,
       frame: this.frame,
       search: this.game ? this.data.current[this.game.turn] : null,
-      evaluations: [...this.points.values()]
+      nodeId: this.nodeId,
+      rootId: this.rootId,
+      history: this.tree?.rows() || [],
+      branch: this.tree
+        ? this.tree
+            .line(this.nodeId)
+            .slice(1)
+            .map((id) => this.tree.nodes[id].record)
+        : [],
+      evaluations: this.tree
+        ? this.tree
+            .line(this.nodeId)
+            .map((id) => this.points.get(id))
+            .filter(Boolean)
+        : []
     };
   }
 
@@ -64,6 +79,16 @@ class Analysis extends EventEmitter {
   select(session, input) {
     if (!input || input.gameId !== session.id) throw new Error('The game has changed.');
     if (session.phase === 'starting') throw new Error('Wait for the game engines to start.');
+    if (
+      this.enabled &&
+      this.gameId === session.id &&
+      ['existing', 'current'].includes(input.source)
+    ) {
+      this.navigate({ revision: this.revision, ply: input.ply });
+      return this.snapshot();
+    }
+    let importedTree;
+    let importedDocument;
     let source = session.game;
     let sourceState = null;
     if (input.source === 'existing') {
@@ -74,6 +99,8 @@ class Analysis extends EventEmitter {
       if (input.source === 'fen' && !input.fen?.trim()) throw new Error('Paste a FEN position.');
       if (input.source === 'pgn' && !input.pgn?.trim()) throw new Error('Paste a PGN game.');
       const imported = input.source === 'pgn' ? parsePgn(input.pgn) : null;
+      importedTree = imported?.tree;
+      importedDocument = imported?.pgn;
       source =
         imported?.game ||
         new DuckGame({
@@ -98,15 +125,24 @@ class Analysis extends EventEmitter {
     if (input.engineId) this.resolveEngine(input.engineId);
     const game = Object.assign(Object.create(DuckGame.prototype), structuredClone(source));
     if (!source.pending || input.ply !== source.moves.length) game.rewind(input.ply);
-    if (this.gameId !== session.id || this.engineId !== input.engineId) this.points.clear();
-    if (['fresh', 'fen', 'pgn'].includes(input.source) || (this.source && !sourceState))
-      this.points.clear();
+    const tree =
+      importedTree ||
+      (!sourceState && session.pgn
+        ? parsePgn(session.savePgn((side) => session.config.playerNames?.[side] || side)).tree
+        : new MoveTree(source));
     this.sourceGame = sourceState ? source : null;
     this.source = sourceState;
     this.gameId = session.id;
     this.rootPly = input.ply;
     this.engineId = input.engineId;
     this.enabled = true;
+    this.pgnDocument = importedDocument || (!sourceState ? session.pgn : null);
+    this.tree = tree;
+    this.points.clear();
+    this.data = new SearchData();
+    this.nodeId = this.tree.line(0)[input.ply];
+    this.rootId = this.nodeId;
+    this.tree.select(this.nodeId);
     this.game = game;
     this.changed();
     return this.snapshot();
@@ -121,7 +157,9 @@ class Analysis extends EventEmitter {
     if (this.game.pending) throw new Error('Complete or undo the piece move before saving.');
     return formatPgn(
       {
-        game: this.game,
+        game: this.tree.game(this.mainlineEnd()),
+        analysisTree: this.tree,
+        pgn: this.pgnDocument,
         config: { w: 'human', b: 'human', fen: this.game.initialFen },
         clock: new GameClock({ w: { mode: 'unlimited' }, b: { mode: 'unlimited' } }),
         clockFrames: [],
@@ -137,21 +175,43 @@ class Analysis extends EventEmitter {
       throw new Error('This variation is too long. Return to the game position.');
     if (this.game.pending) this.game.placeDuck(input.to);
     else this.game.piece(input.from, input.to, input.promotion);
+    if (!this.game.pending) {
+      this.nodeId = this.tree.add(this.nodeId, this.game.records.at(-1));
+      this.tree.select(this.nodeId);
+    }
+    this.changed();
+  }
+
+  mainlineEnd() {
+    let node = this.tree.nodes[0];
+    while (node.children.length) node = this.tree.nodes[node.children[0]];
+    return node.id;
+  }
+
+  navigate(input) {
+    this.requirePosition(input);
+    const line = this.tree.line(this.nodeId);
+    const id = input.nodeId ?? line[Math.max(0, Math.min(input.ply, line.length - 1))];
+    const game = this.tree.game(id);
+    this.tree.select(id);
+    this.nodeId = id;
+    this.game = game;
     this.changed();
   }
 
   back(input) {
     this.requirePosition(input);
     if (this.game.pending) this.game.cancelPiece();
-    else if (this.game.moves.length > this.rootPly) this.game.rewind(this.game.moves.length - 1);
-    else return;
+    else if (this.nodeId !== 0) {
+      this.navigate({ ...input, nodeId: this.tree.nodes[this.nodeId].parent });
+      return;
+    } else return;
     this.changed();
   }
 
   reset(input) {
     this.requirePosition(input);
-    this.game.rewind(this.rootPly);
-    this.changed();
+    this.navigate({ ...input, nodeId: this.rootId });
   }
 
   settings(input) {
@@ -296,8 +356,8 @@ class Analysis extends EventEmitter {
               if (token !== this.generation) return;
               const info = this.data.update(line, side);
               if (!info) return;
-              if (info.evaluation && this.game.moves.length === this.rootPly)
-                this.points.set(this.rootPly, info.evaluation);
+              if (info.evaluation)
+                this.points.set(this.nodeId, { ...info.evaluation, nodeId: this.nodeId });
               if (!this.publishTimer) this.publishTimer = setTimeout(() => this.publish(), 100);
             })
       )

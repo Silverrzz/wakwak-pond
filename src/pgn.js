@@ -1,6 +1,7 @@
 import { DuckGame, index, square, sideName } from './rules.js';
 import { GameClock, normalizeControl } from './clock.js';
 import { SearchData } from './search-data.js';
+import { MoveTree } from './move-tree.js';
 
 const results = new Set(['*', '1-0', '0-1', '1/2-1/2']);
 const safe = (value) =>
@@ -450,7 +451,32 @@ function parsePgn(text) {
   }
   const searchData = readAnalysis(document, game, config);
   const pgn = { headers, initial: document.initial, entries, moves: [...game.moves] };
-  return { game, clock, clockFrames, config, searchData, pgn };
+  const tree = new MoveTree(new DuckGame(config));
+  const tasks = [{ parent: 0, entries, initial: document.initial }];
+  let count = 0;
+  for (let taskIndex = 0; taskIndex < tasks.length; taskIndex++) {
+    const task = tasks[taskIndex];
+    const branch = tree.game(task.parent);
+    let parent = task.parent;
+    if (task.initial.some((annotation) => annotation.variation))
+      throw new Error('A PGN variation must follow the move it replaces.');
+    for (const entry of task.entries) {
+      if (++count > 10000) throw new Error('The PGN contains too many moves.');
+      playSan(branch, entry.move);
+      const id = tree.add(
+        parent,
+        branch.records.at(-1),
+        entry.annotations.filter((annotation) => !annotation.variation)
+      );
+      for (const annotation of entry.annotations) {
+        if (!annotation.variation) continue;
+        const variation = readDocument(annotation.variation.slice(1, -1));
+        tasks.push({ parent, entries: variation.entries, initial: variation.initial });
+      }
+      parent = id;
+    }
+  }
+  return { game, clock, clockFrames, config, searchData, pgn, tree };
 }
 
 function formatPgn(session, playerName) {
@@ -508,12 +534,12 @@ function formatPgn(session, playerName) {
     if (control.mode === 'unlimited')
       tags['Pond' + label + 'EngineTime'] = control.engineTime / 1000;
   }
-  const annotations = (list) =>
+  const annotations = (list, preserveAnalysis = false) =>
     (list || []).flatMap((annotation) => {
       if (annotation.variation) return [annotation.variation];
       if (annotation.nag) return [annotation.nag];
       const text = (annotation.text || '')
-        .replace(/\[%(?:clk|eval|pondsearch|pondinfo)\s+[^\]]*\]/g, '')
+        .replace(/\[%(?:clk|eval|pondsearch|pondinfo)\s+[^\]]*\]/g, preserveAnalysis ? '$&' : '')
         .trim();
       return text ? ['{' + text.replace(/}/g, '') + '}'] : [];
     });
@@ -533,6 +559,36 @@ function formatPgn(session, playerName) {
       moves.push(`{[%clk ${clockText(remaining)}]}`);
     if (original) moves.push(...annotations(stored.entries[i].annotations));
     moves.push(...(analysis.get(i + 1) || []));
+  }
+  if (session.analysisTree) {
+    moves.length = 0;
+    moves.push(...annotations(stored?.initial));
+    const tree = session.analysisTree;
+    const stack = tree.nodes[0].children.length
+      ? [{ id: tree.nodes[0].children[0], alternatives: true }]
+      : [];
+    while (stack.length) {
+      const item = stack.pop();
+      if (typeof item === 'string') {
+        moves.push(item);
+        continue;
+      }
+      const node = tree.nodes[item.id];
+      const record = node.record;
+      moves.push(
+        record.number +
+          (record.side === 'w' ? '. ' : '... ') +
+          record.san +
+          (record.duck ? ',' + record.duck : '')
+      );
+      moves.push(...annotations(node.annotations, true));
+      if (node.children.length) stack.push({ id: node.children[0], alternatives: true });
+      if (item.alternatives) {
+        const siblings = tree.nodes[node.parent].children;
+        for (let i = siblings.length - 1; i > 0; i--)
+          stack.push(')', { id: siblings[i], alternatives: false }, '(');
+      }
+    }
   }
   moves.push(tags.Result);
   const lines = [];
