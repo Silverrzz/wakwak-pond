@@ -79,6 +79,13 @@ function settings(data) {
       role="status"
     >
       {{ status }}
+      <button
+        v-if="analysis.phase === 'error'"
+        :disabled="busy"
+        @click="game.analysisAction('retryAnalysis')"
+      >
+        Retry analysis
+      </button>
     </div>
     <div v-if="branch.length || position?.pending" class="analysis-branch">
       <div class="analysis-branch-controls">

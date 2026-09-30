@@ -34,6 +34,7 @@ class Analysis extends EventEmitter {
     this.maxLines = 1;
     this.phase = 'idle';
     this.error = '';
+    this.retryCount = 0;
   }
 
   snapshot() {
@@ -172,7 +173,13 @@ class Analysis extends EventEmitter {
     this.changed();
   }
 
+  retry(input) {
+    this.requirePosition(input);
+    this.changed();
+  }
+
   changed() {
+    this.retryCount = 0;
     this.revision++;
     const token = ++this.generation;
     this.error = '';
@@ -395,15 +402,23 @@ class Analysis extends EventEmitter {
   }
 
   failed(error) {
+    clearTimeout(this.startTimer);
     this.engine?.close();
     this.engine = null;
     this.data.stop('w');
     this.data.stop('b');
     this.phase = 'error';
-    this.error = error.message;
+    const retrying =
+      this.enabled &&
+      !this.game.result &&
+      this.retryCount < 3 &&
+      globalThis.crossOriginIsolated &&
+      typeof SharedArrayBuffer !== 'undefined';
+    this.error = retrying
+      ? `${error.message} Retrying (${this.retryCount + 1}/3)…`
+      : `${error.message} Automatic retries stopped. Use Retry analysis to try again.`;
     this.publish();
-    if (globalThis.crossOriginIsolated && typeof SharedArrayBuffer !== 'undefined')
-      this.restart(3000);
+    if (retrying) this.restart(3000 * 2 ** this.retryCount++);
   }
 
   close() {

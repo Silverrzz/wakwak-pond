@@ -1,3 +1,4 @@
+import { storage } from '../../storage.js';
 import { computed, onMounted, onUnmounted, ref, shallowRef } from 'vue';
 import { sideName } from '../shared/format';
 
@@ -10,12 +11,12 @@ export function useGame(feedback) {
   );
   const analysis = shallowRef({ enabled: false });
   const analysisBusy = ref(false);
-  const analysisEngine = ref(localStorage.getItem('pond-analysis-engine') || '');
+  const analysisEngine = ref(storage.getItem('pond-analysis-engine') || '');
   const catalog = shallowRef([]);
   const liveSearches = shallowRef({});
   const evaluations = shallowRef([]);
   const selected = ref(null);
-  const flipped = ref(localStorage.getItem('pond-flipped') === 'true');
+  const flipped = ref(storage.getItem('pond-flipped') === 'true');
   const promotionMove = shallowRef(null);
   const draggedMove = shallowRef(null);
   const submitting = ref(false);
@@ -204,7 +205,7 @@ export function useGame(feedback) {
         if (options.source) resetReview();
         if (engine) {
           analysisEngine.value = engine.id;
-          localStorage.setItem('pond-analysis-engine', engine.id);
+          storage.setItem('pond-analysis-engine', engine.id);
         }
         return true;
       }, errorTarget);
@@ -219,7 +220,7 @@ export function useGame(feedback) {
     try {
       await feedback.action(async () => {
         await window.pond[method]({ revision: analysis.value.revision, ...data });
-        if (data.engineId) localStorage.setItem('pond-analysis-engine', data.engineId);
+        if (data.engineId) storage.setItem('pond-analysis-engine', data.engineId);
       });
     } finally {
       analysisBusy.value = false;
@@ -344,7 +345,7 @@ export function useGame(feedback) {
 
   function flip(value = !flipped.value) {
     flipped.value = value;
-    localStorage.setItem('pond-flipped', String(value));
+    storage.setItem('pond-flipped', String(value));
   }
 
   onMounted(() => {

@@ -32,6 +32,7 @@ const confirmation = shallowRef(null);
 let analysisEntry = '';
 let navigation = Promise.resolve();
 const pond = window.pond;
+const licensesUrl = `${import.meta.env.BASE_URL}licenses/index.html`;
 const supported = globalThis.crossOriginIsolated && typeof SharedArrayBuffer !== 'undefined';
 const pages = ['home', 'play', 'analysis', 'rules'];
 provide(pondKey, { game, feedback });
@@ -461,6 +462,9 @@ onUnmounted(() => {
       <EvaluationPanel v-if="page === 'analysis'" :output="output" @review="game.review" />
     </div>
   </main>
+  <footer class="site-footer">
+    <a :href="licensesUrl" target="_blank" rel="noopener">Credits and licences</a>
+  </footer>
   <GameSetup
     v-model="setup"
     :busy="starting"

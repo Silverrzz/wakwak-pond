@@ -1,6 +1,7 @@
 import { Session } from './session.js';
 import { Analysis } from './analysis.js';
 import { opposite, sideName } from './rules.js';
+import { storage } from './storage.js';
 
 const profile = {
   id: 'wakwak',
@@ -30,7 +31,7 @@ let restored = false;
 function persist() {
   if (session.phase === 'ready' || session.game.pending) return;
   try {
-    localStorage.setItem('wakwak-game', session.savePgn(playerName));
+    storage.setItem('wakwak-game', session.savePgn(playerName));
   } catch {}
 }
 
@@ -55,10 +56,10 @@ window.pond = {
     if (!restored) {
       restored = true;
       try {
-        const saved = localStorage.getItem('wakwak-game');
+        const saved = storage.getItem('wakwak-game');
         if (saved) session.loadPgn(saved, (id) => (id === 'human' ? 'human' : 'wakwak'));
       } catch {
-        localStorage.removeItem('wakwak-game');
+        storage.removeItem('wakwak-game');
       }
     }
     return { state: session.snapshot(), analysis: analysis.snapshot(), engines: [profile] };
@@ -88,6 +89,7 @@ window.pond = {
   analysisBack: async (data) => analysis.back(data),
   analysisReset: async (data) => analysis.reset(data),
   analysisSettings: async (data) => analysis.settings(data),
+  retryAnalysis: async (data) => analysis.retry(data),
   copyAnalysisFen: async (data) => {
     analysis.requirePosition(data);
     if (analysis.game.pending) throw new Error('Place the duck or undo the piece move first.');

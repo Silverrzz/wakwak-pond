@@ -168,8 +168,10 @@ onUnmounted(() => {
 
 <template>
   <div ref="host" class="home-scene">
-    <div class="water-ring ring-one" aria-hidden="true"></div>
-    <div class="water-ring ring-two" aria-hidden="true"></div>
+    <div class="water-rings" aria-hidden="true">
+      <div class="water-ring ring-one"></div>
+      <div class="water-ring ring-two"></div>
+    </div>
     <div class="floating-board" aria-hidden="true">
       <div class="scene-squares">
         <div
