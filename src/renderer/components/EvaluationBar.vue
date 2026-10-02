@@ -10,11 +10,11 @@ const principal = computed(
       .filter((row) => (row.multipv || 1) === 1 && row.score !== undefined)
       .sort((a, b) => b.depth - a.depth)[0]
 );
-const whiteShare = computed(() => {
+const whiteShare = computed((previous) => {
   const position = game.analysis.value.frame;
   if (position?.result) return position.winner === 'w' ? 100 : position.winner === 'b' ? 0 : 50;
   const row = principal.value;
-  if (!row) return 50;
+  if (!row) return previous ?? 50;
   if (row.scoreType === 'mate') return row.mateWinner === 'w' ? 100 : 0;
   return 50 + 50 * Math.tanh(row.score / 600);
 });
