@@ -8,7 +8,7 @@ const profile = {
   name: 'Wakwak',
   addedOrder: 1,
   file: new URL(
-    `${import.meta.env.BASE_URL}engines/wakwak-0.15.0-4ab40b6/wakwak.worker.js`,
+    `${import.meta.env.BASE_URL}engines/wakwak-1.0.0-74c852b/wakwak.worker.js`,
     document.baseURI
   ).href,
   settings: { Threads: 1, Hash: 32 }
